@@ -14,6 +14,11 @@ storage:
     - path: /var/opt/caddy/data
       mode: 0755
   files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: wyse
     - path: /var/opt/caddy/site/index.html
       mode: 0644
       contents:
