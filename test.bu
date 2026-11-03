@@ -1,0 +1,61 @@
+variant: fcos
+version: 1.7.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIBUo9a9N31e9fqwSZU8K34rO7sHDd4I/x6TD6Wzsq/gdAAAABHNzaDo=
+storage:
+  directories:
+    - path: /var/opt/caddy/site
+      mode: 0755
+    - path: /var/opt/caddy/config
+      mode: 0755
+    - path: /var/opt/caddy/data
+      mode: 0755
+  files:
+    - path: /var/opt/caddy/site/index.html
+      mode: 0644
+      contents:
+        inline: |
+          <!DOCTYPE html>
+          <html>
+          <head><title>Caddy</title></head>
+          <body>
+            <h1>Hello from Caddy!</h1>
+          </body>
+          </html>
+
+    - path: /var/opt/caddy/config/Caddyfile
+      mode: 0644
+      contents:
+        inline: |
+          :80 {
+              root * /srv
+              file_server
+              encode
+          }
+
+    - path: /etc/containers/systemd/caddy.container
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Caddy Web Server Container
+          After=network-online.target
+          Wants=network-online.target
+
+          [Container]
+          Image=docker.io/library/caddy:2.7.6-alpine
+          ContainerName=caddy
+          PublishPort=80:80
+          PublishPort=443:443
+          Volume=/var/opt/caddy/config:/etc/caddy:ro,z
+          Volume=/var/opt/caddy/site:/srv:ro,z
+          Volume=/var/opt/caddy/data:/data:z
+
+          [Service]
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
